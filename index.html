@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prediction Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .game-container {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
+    }
+    .header {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .timer {
+      text-align: center;
+      background: #f39c12;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .wallet {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .lock-warning {
+      text-align: center;
+      font-size: 14px;
+      color: #f39c12;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .section {
+      margin-bottom: 15px;
+    }
+    .section-title {
+      margin-bottom: 10px;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .buttons button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      min-width: 60px;
+    }
+    .green { background-color: #27ae60; }
+    .red { background-color: #e74c3c; }
+    .violet { background-color: #8e44ad; }
+    .big { background-color: #2980b9; font-size: 18px; padding: 14px 20px; }
+    .small { background-color: #16a085; font-size: 18px; padding: 14px 20px; }
+    .number-btn { background-color: #555; }
+    .selected { outline: 3px solid yellow; }
+    .results { margin-top: 20px; }
+    .results table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .results th, .results td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: center;
+    }
+    .dot {
+      height: 12px;
+      width: 12px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+    .dot.green { background: #27ae60; }
+    .dot.red { background: #e74c3c; }
+    .dot.violet { background: #8e44ad; }
+    .bid-input {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .bid-input input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      width: 100px;
+      text-align: center;
+    }
+    .disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="header">Prediction Game</div>
+    <div class="wallet">Wallet Balance: $<span id="wallet">5000</span></div>
+    <div class="timer">
+      Time Remaining: <span id="countdown">30</span>s<br>
+      Period: <span id="period">1</span>
+    </div>
+    <div id="lock-warning" class="lock-warning">Bidding locked! Wait for next round.</div>
+    <div class="bid-input">
+      <label for="bidAmount">Enter Your Bid:</label><br>
+      <input type="number" id="bidAmount" min="1" max="20000" placeholder="Amount">
+    </div>
+    <div class="section">
+      <div class="section-title">Pick Color:</div>
+      <div class="buttons" id="color-buttons">
+        <button class="green" onclick="toggleColor('green', this)">Green</button>
+        <button class="red" onclick="toggleColor('red', this)">Red</button>
+        <button class="violet" onclick="toggleColor('violet', this)">Violet</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Pick Number:</div>
+      <div class="buttons" id="number-buttons"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Big / Small:</div>
+      <div class="buttons" id="size-buttons">
+        <button class="big" onclick="toggleSize('Big', this)">Big</button>
+        <button class="small" onclick="toggleSize('Small', this)">Small</button>
+      </div>
+    </div>
+    <div class="results">
+      <table>
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Number</th>
+            <th>Size</th>
+            <th>Color</th>
+          </tr>
+        </thead>
+        <tbody id="resultTable"></tbody>
+      </table>
+    </div>
+  </div>
+  <audio id="winSound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
+  <audio id="loseSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
+  <script>
+    let countdown = 30;
+    let period = 1;
+    let selectedNumber = null;
+    let selectedColor = null;
+    let selectedSize = null;
+    let walletBalance = 5000;
+    let bidDeducted = false;
+    const countdownEl = document.getElementById('countdown');
+    const periodEl = document.getElementById('period');
+    const resultTable = document.getElementById('resultTable');
+    const numberButtonsContainer = document.getElementById('number-buttons');
+    const winSound = document.getElementById('winSound');
+    const loseSound = document.getElementById('loseSound');
+    const bidInput = document.getElementById('bidAmount');
+    const lockWarning = document.getElementById('lock-warning');
+    const walletDisplay = document.getElementById('wallet');
+    for (let i = 0; i <= 9; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'number-btn';
+      btn.textContent = i;
+      btn.onclick = () => toggleNumber(i, btn);
+      numberButtonsContainer.appendChild(btn);
+    }
+    function toggleNumber(num, btn) {
+      if (countdown < 6 || countdown > 30) return;
+      if (selectedNumber === num) {
+        selectedNumber = null;
+        btn.classList.remove('selected');
+      } else {
+        selectedNumber = num;
+        document.querySelectorAll('.number-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      }
+    }
+    function toggleColor(color, btn) {
+      if (countdown < 6 || countdown > 30) return;
+      if (selectedColor === color) {
+        selectedColor = null;
+        btn.classList.remove('selected');
+      } else {
+        selectedColor = color;
+        document.querySelectorAll('#color-buttons button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      }
+    }
+    function toggleSize(size, btn) {
+      if (countdown < 6 || countdown > 30) return;
+      if (selectedSize === size) {
+        selectedSize = null;
+        btn.classList.remove('selected');
+      } else {
+        selectedSize = size;
+        document.querySelectorAll('#size-buttons button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      }
+    }
+    function updateCountdown() {
+      countdown--;
+      countdownEl.textContent = countdown;
+      if (countdown < 6) {
+        document.querySelectorAll('button').forEach(btn => btn.classList.add('disabled'));
+        bidInput.disabled = true;
+        lockWarning.style.display = 'block';
+        if (!bidDeducted) {
+          const bidAmount = parseInt(bidInput.value) || 0;
+          const guessed = (selectedNumber !== null || selectedColor !== null || selectedSize !== null) && bidAmount >= 1 && bidAmount <= 20000;
+          if (guessed) {
+            if (bidAmount > walletBalance) {
+              alert("Insufficient wallet balance!");
+              resetSelections();
+            } else {
+              walletBalance -= bidAmount;
+              walletDisplay.textContent = walletBalance;
+              bidDeducted = true;
+            }
+          }
+        }
+      } else {
+        document.querySelectorAll('button').forEach(btn => btn.classList.remove('disabled'));
+        bidInput.disabled = false;
+        lockWarning.style.display = 'none';
+      }
+      if (countdown === 0) {
+        generateResult();
+        countdown = 30;
+        bidDeducted = false;
+      }
+    }
+    function generateResult() {
+      const number = Math.floor(Math.random() * 10);
+      const size = number >= 5 ? 'Big' : 'Small';
+      const colors = ['green', 'red', 'violet'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const resultRow = document.createElement('tr');
+      resultRow.innerHTML = `
+        <td>${period}</td>
+        <td>${number}</td>
+        <td>${size}</td>
+        <td><span class='dot ${color}'></span></td>
+      `;
+      resultTable.insertBefore(resultRow, resultTable.firstChild);
+      while (resultTable.rows.length > 10) {
+        resultTable.removeChild(resultTable.lastChild);
+      }
+      const bidAmount = parseInt(bidInput.value) || 0;
+      const guessed = (selectedNumber !== null || selectedColor !== null || selectedSize !== null) && bidAmount >= 1 && bidAmount <= 20000;
+      if (guessed && bidDeducted) {
+        const win =
+          (!selectedNumber || selectedNumber === number) &&
+          (!selectedColor || selectedColor === color) &&
+          (!selectedSize || selectedSize === size);
+        if (win) {
+          walletBalance += bidAmount * 2;
+          alert(`You Win! Amount: $${bidAmount * 2}`);
+          winSound.play();
+        } else {
+          alert(`You Lose! Amount: $${bidAmount}`);
+          loseSound.play();
+        }
+        walletDisplay.textContent = walletBalance;
+      }
+      resetSelections();
+      period++;
+      periodEl.textContent = period;
+    }
+    function resetSelections() {
+      selectedNumber = null;
+      selectedColor = null;
+      selectedSize = null;
+      bidInput.value = '';
+      document.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+    }
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>

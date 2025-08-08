@@ -95,13 +95,163 @@
       border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wallet-info {
+      display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
     .wallet-icon {
       color: var(--warning);
+    }
+
+    .add-money-btn {
+      background: linear-gradient(135deg, var(--success), #00a884);
+      border: none;
+      border-radius: 5px;
+      padding: 0.4rem 0.8rem;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .add-money-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .add-money-btn:active {
+      transform: translateY(0);
+    }
+
+    .money-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .money-modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .money-modal-content {
+      background: linear-gradient(145deg, #232323, #1e1e1e);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .money-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .money-modal-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .money-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .money-option {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .money-option:hover {
+      background: rgba(108, 92, 231, 0.2);
+      border-color: var(--primary);
+    }
+
+    .money-option.selected {
+      background: rgba(108, 92, 231, 0.4);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3);
+    }
+
+    .custom-amount {
+      margin-top: 1rem;
+    }
+
+    .custom-amount input {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .custom-amount input:focus {
+      outline: none;
+      border: 1px solid var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .confirm-btn {
+      background: linear-gradient(135deg, var(--success), #00a884);
+      color: white;
+    }
+
+    .cancel-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
     }
 
     .timer-container {
@@ -255,7 +405,25 @@
     .violet { background: linear-gradient(135deg, var(--violet), #5d4ac9); }
     .big { background: linear-gradient(135deg, var(--info), #0974c0); font-size: 1rem; padding: 1rem 1.5rem; }
     .small { background: linear-gradient(135deg, #00cec9, #00a8a3); font-size: 1rem; padding: 1rem 1.5rem; }
-    .number-btn { background: linear-gradient(135deg, #636e72, #4a5357); }
+    .number-btn { 
+      background: linear-gradient(135deg, #636e72, #4a5357);
+      flex: 1 0 calc(20% - 0.8rem);
+      min-width: 0;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 0;
+    }
+
+    .number-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: space-between;
+    }
 
     .selected {
       transform: scale(1.05);
@@ -449,6 +617,26 @@
       .section-bet input {
         width: 60px;
       }
+
+      .number-btn {
+        flex: 1 0 calc(20% - 0.5rem);
+        font-size: 1rem;
+      }
+
+      .wallet {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .wallet-info {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .add-money-btn {
+        width: 100%;
+        padding: 0.5rem;
+      }
     }
   </style>
 </head>
@@ -456,8 +644,11 @@
   <div class="game-container">
     <div class="header">Multi-Bet Predictor</div>
     <div class="wallet">
-      <span class="wallet-icon">💰</span>
-      Balance: $<span id="wallet">5000</span>
+      <div class="wallet-info">
+        <span class="wallet-icon">💰</span>
+        Balance: $<span id="wallet">5000</span>
+      </div>
+      <button class="add-money-btn" id="addMoneyBtn">Add Money</button>
     </div>
     
     <div class="bet-summary">
@@ -514,7 +705,7 @@
           <input type="number" id="numberBet" min="1" max="20000" placeholder="0">
         </div>
       </div>
-      <div class="buttons" id="number-buttons"></div>
+      <div class="buttons number-grid" id="number-buttons"></div>
     </div>
 
     <div class="section">
@@ -557,6 +748,29 @@
     </div>
   </div>
 
+  <!-- Add Money Modal -->
+  <div class="money-modal" id="moneyModal">
+    <div class="money-modal-content">
+      <div class="money-modal-header">
+        <div class="money-modal-title">Add Money to Wallet</div>
+        <button class="close-modal" id="closeModal">&times;</button>
+      </div>
+      <div class="money-options">
+        <div class="money-option" data-amount="100" onclick="selectMoneyOption(100, this)">$100</div>
+        <div class="money-option" data-amount="500" onclick="selectMoneyOption(500, this)">$500</div>
+        <div class="money-option" data-amount="1000" onclick="selectMoneyOption(1000, this)">$1,000</div>
+        <div class="money-option" data-amount="5000" onclick="selectMoneyOption(5000, this)">$5,000</div>
+      </div>
+      <div class="custom-amount">
+        <input type="number" id="customAmount" placeholder="Enter custom amount" min="1">
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelAddMoney">Cancel</button>
+        <button class="confirm-btn" id="confirmAddMoney">Add Money</button>
+      </div>
+    </div>
+  </div>
+
   <div class="win-animation" id="winAnimation">
     <div class="win-text">WINNER!</div>
   </div>
@@ -580,6 +794,7 @@
   <audio id="selectSound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3"></audio>
   <audio id="countdownSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"></audio>
   <audio id="resultSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
+  <audio id="cashSound" src="https://assets.mixkit.co/sfx/preview/mixkit-cash-register-purchase-880.mp3"></audio>
 
   <script>
     let countdown = 30;
@@ -587,6 +802,8 @@
     let walletBalance = 5000;
     let bidDeducted = false;
     let lastWinAmount = 0;
+    let selectedMoneyOption = null;
+    let selectedMoneyElement = null;
     
     // Betting state
     const bets = {
@@ -605,6 +822,7 @@
     const selectSound = document.getElementById('selectSound');
     const countdownSound = document.getElementById('countdownSound');
     const resultSound = document.getElementById('resultSound');
+    const cashSound = document.getElementById('cashSound');
     const lockWarning = document.getElementById('lock-warning');
     const walletDisplay = document.getElementById('wallet');
     const winAnimation = document.getElementById('winAnimation');
@@ -613,19 +831,82 @@
     const notifMessage = document.getElementById('notifMessage');
     const totalBetEl = document.getElementById('totalBet');
     const potentialWinEl = document.getElementById('potentialWin');
+    const moneyModal = document.getElementById('moneyModal');
+    const addMoneyBtn = document.getElementById('addMoneyBtn');
+    const closeModal = document.getElementById('closeModal');
+    const cancelAddMoney = document.getElementById('cancelAddMoney');
+    const confirmAddMoney = document.getElementById('confirmAddMoney');
+    const customAmountInput = document.getElementById('customAmount');
     
     // Bet inputs
     const colorBetInput = document.getElementById('colorBet');
     const numberBetInput = document.getElementById('numberBet');
     const sizeBetInput = document.getElementById('sizeBet');
 
-    // Create number buttons
+    // Create number buttons in a grid layout (2 rows of 5 numbers)
     for (let i = 0; i <= 9; i++) {
       const btn = document.createElement('button');
       btn.className = 'number-btn';
-      btn.innerHTML = `<span style="font-size: 1.2rem; font-weight: 700;">${i}</span>`;
+      btn.innerHTML = `<span>${i}</span>`;
       btn.onclick = () => toggleNumber(i, btn);
       numberButtonsContainer.appendChild(btn);
+    }
+
+    // Modal event listeners
+    addMoneyBtn.addEventListener('click', () => {
+      moneyModal.classList.add('show');
+    });
+
+    closeModal.addEventListener('click', () => {
+      moneyModal.classList.remove('show');
+      resetMoneySelection();
+    });
+
+    cancelAddMoney.addEventListener('click', () => {
+      moneyModal.classList.remove('show');
+      resetMoneySelection();
+    });
+
+    confirmAddMoney.addEventListener('click', () => {
+      let amountToAdd = selectedMoneyOption;
+      
+      // If custom amount is entered and no option is selected
+      if (!amountToAdd && customAmountInput.value) {
+        amountToAdd = parseInt(customAmountInput.value);
+      }
+      
+      if (amountToAdd && amountToAdd > 0) {
+        walletBalance += amountToAdd;
+        walletDisplay.textContent = walletBalance;
+        cashSound.play();
+        showNotification('Wallet Updated', `$${amountToAdd} added to your wallet!`);
+        moneyModal.classList.remove('show');
+        resetMoneySelection();
+      } else {
+        showNotification('Error', 'Please select or enter a valid amount');
+      }
+    });
+
+    function selectMoneyOption(amount, element) {
+      // Reset previous selection
+      if (selectedMoneyElement) {
+        selectedMoneyElement.classList.remove('selected');
+      }
+      
+      // Set new selection
+      selectedMoneyOption = amount;
+      selectedMoneyElement = element;
+      element.classList.add('selected');
+      customAmountInput.value = '';
+    }
+
+    function resetMoneySelection() {
+      if (selectedMoneyElement) {
+        selectedMoneyElement.classList.remove('selected');
+      }
+      selectedMoneyOption = null;
+      selectedMoneyElement = null;
+      customAmountInput.value = '';
     }
 
     function toggleNumber(num, btn) {
